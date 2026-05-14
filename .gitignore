@@ -1,0 +1,10 @@
+# Service account keys — never commit
+*.json
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.env

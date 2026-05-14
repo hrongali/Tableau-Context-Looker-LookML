@@ -1,0 +1,131 @@
+name: customer_360
+description: Unified customer profile for McContext. Contains Plus subscription status, lifetime value, CSAT scores, refund history, loyalty tier, and contact information. Lives in the gold schema as a pre-aggregated customer view.
+database: mccontext
+schema: gold
+table: customer_360
+
+dimensions:
+  - name: customer_id
+    description: Unique customer identifier (joins to all fact tables)
+    expr: customer_id
+    data_type: LONG
+
+  - name: full_name
+    description: Customer's full name
+    expr: full_name
+    data_type: STRING
+    synonyms: [name, customer name]
+
+  - name: email
+    description: Customer's email address
+    expr: email
+    data_type: STRING
+
+  - name: phone
+    description: Customer's phone number
+    expr: phone
+    data_type: STRING
+
+  - name: plus_subscriber
+    description: Whether customer is a Plus subscriber (true/false)
+    expr: plus_subscriber
+    data_type: BOOLEAN
+    synonyms: [Plus member, Plus status, subscription status]
+
+  - name: loyalty_tier
+    description: Customer loyalty tier (Bronze, Silver, Gold, Platinum)
+    expr: loyalty_tier
+    data_type: STRING
+    synonyms: [tier, loyalty level, rewards tier]
+
+  - name: subscription_plan
+    description: Current subscription plan name
+    expr: subscription_plan
+    data_type: STRING
+    synonyms: [plan, membership plan]
+
+time_dimensions:
+  - name: signup_date
+    description: When the customer first signed up
+    expr: signup_date
+    data_type: DATE
+    synonyms: [join date, registration date]
+
+  - name: last_order_at
+    description: Most recent order timestamp
+    expr: last_order_at
+    data_type: TIMESTAMP
+    synonyms: [last activity, last purchase]
+
+  - name: refreshed_at
+    description: When this profile was last refreshed
+    expr: refreshed_at
+    data_type: TIMESTAMP
+
+measures:
+  - name: lifetime_spend_usd
+    description: Total customer lifetime spend in USD
+    expr: SUM(lifetime_spend_usd)
+    data_type: DECIMAL
+    synonyms: [LTV, lifetime value, total spend, CLV]
+
+  - name: lifetime_refund_usd
+    description: Total refund amount issued to this customer
+    expr: SUM(lifetime_refund_usd)
+    data_type: DECIMAL
+    synonyms: [total refunds, refund amount]
+
+  - name: avg_csat
+    description: Average CSAT score from last 5 interactions
+    expr: AVG(avg_csat_last_5)
+    data_type: DECIMAL
+    synonyms: [satisfaction score, CSAT]
+
+  - name: lifetime_orders
+    description: Total number of orders placed
+    expr: SUM(lifetime_orders)
+    data_type: INT
+    synonyms: [order count, total orders]
+
+  - name: open_case_count
+    description: Number of currently open support cases
+    expr: SUM(open_case_count)
+    data_type: INT
+
+  - name: lifetime_case_count
+    description: Total number of support cases ever opened
+    expr: SUM(lifetime_case_count)
+    data_type: INT
+    synonyms: [total cases, case count]
+
+  - name: earn_multiplier
+    description: Loyalty points earn multiplier
+    expr: AVG(earn_multiplier)
+    data_type: DECIMAL
+
+  - name: mrr_usd
+    description: Monthly recurring revenue from this customer
+    expr: SUM(mrr_usd)
+    data_type: DECIMAL
+    synonyms: [MRR, monthly revenue]
+
+filters:
+  - name: plus_subscribers
+    description: Active Plus subscribers only
+    expr: plus_subscriber = true
+
+  - name: high_value_customers
+    description: Customers with lifetime spend > $1000
+    expr: lifetime_spend_usd > 1000
+
+  - name: at_risk_customers
+    description: Customers with low CSAT (below 3.0)
+    expr: avg_csat_last_5 < 3.0
+
+  - name: platinum_tier
+    description: Platinum loyalty tier customers
+    expr: loyalty_tier = 'Platinum'
+
+  - name: has_open_cases
+    description: Customers with at least one open case
+    expr: open_case_count > 0

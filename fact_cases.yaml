@@ -1,0 +1,145 @@
+name: fact_cases
+description: Support case lifecycle for McContext customer service. Each row represents a support case (ticket) with priority, SLA tracking, linked entities (charges, orders, outages, refunds), and resolution details.
+database: mccontext
+schema: silver
+table: fact_cases
+
+dimensions:
+  - name: ticket_id
+    description: Unique identifier for the support case/ticket
+    expr: ticket_id
+    data_type: STRING
+    synonyms: [case id, ticket number, case number]
+
+  - name: ticket_number
+    description: Human-readable ticket number
+    expr: ticket_number
+    data_type: STRING
+
+  - name: customer_id
+    description: Customer who opened the case
+    expr: customer_id
+    data_type: LONG
+
+  - name: status
+    description: Current case status (open, pending, resolved, closed, escalated)
+    expr: status
+    data_type: STRING
+    synonyms: [case status, ticket status]
+
+  - name: priority
+    description: Case priority level (low, normal, high, critical)
+    expr: priority
+    data_type: STRING
+    synonyms: [urgency, case priority]
+
+  - name: assigned_team
+    description: Team currently handling the case
+    expr: assigned_team
+    data_type: STRING
+    synonyms: [team, queue]
+
+  - name: current_assignee_id
+    description: Agent currently assigned to the case
+    expr: current_assignee_id
+    data_type: LONG
+
+  - name: resolution_type
+    description: How the case was resolved (Closed - no action, refund, credit, escalation, duplicate_charge_reversal)
+    expr: resolution_type
+    data_type: STRING
+    synonyms: [resolution, outcome]
+
+  - name: intent_classified
+    description: Classified intent of the customer's issue (food_quality, double_charge, outage, refund_request)
+    expr: intent_classified
+    data_type: STRING
+    synonyms: [intent, issue type, case type]
+
+  - name: linked_charge_count
+    description: Number of charges linked to this case
+    expr: linked_charge_count
+    data_type: INT
+
+  - name: linked_order_count
+    description: Number of orders linked to this case
+    expr: linked_order_count
+    data_type: INT
+
+  - name: linked_refund_count
+    description: Number of refunds linked to this case
+    expr: linked_refund_count
+    data_type: INT
+
+time_dimensions:
+  - name: opened_at
+    description: When the case was opened
+    expr: opened_at
+    data_type: TIMESTAMP
+    synonyms: [created at, case date]
+
+  - name: first_response_at
+    description: When the first agent response was sent
+    expr: first_response_at
+    data_type: TIMESTAMP
+
+  - name: closed_at
+    description: When the case was closed/resolved
+    expr: closed_at
+    data_type: TIMESTAMP
+    synonyms: [resolved at, closure date]
+
+measures:
+  - name: case_count
+    description: Number of support cases
+    expr: COUNT(ticket_id)
+    data_type: NUMBER
+    synonyms: [ticket count, number of cases]
+
+  - name: open_case_count
+    description: Number of currently open/pending cases
+    expr: COUNT(CASE WHEN status IN ('open', 'pending') THEN 1 END)
+    data_type: NUMBER
+
+  - name: credit_amount_usd
+    description: Total credit amount issued on cases
+    expr: SUM(credit_amount_usd)
+    data_type: DECIMAL
+
+  - name: refund_amount_usd
+    description: Total refund amount on cases
+    expr: SUM(refund_amount_usd)
+    data_type: DECIMAL
+
+  - name: time_to_first_response_seconds
+    description: Time from case open to first response in seconds
+    expr: AVG(time_to_first_response_seconds)
+    data_type: LONG
+    synonyms: [first response time, TTFR]
+
+  - name: time_to_resolution_seconds
+    description: Time from case open to resolution in seconds
+    expr: AVG(time_to_resolution_seconds)
+    data_type: LONG
+    synonyms: [resolution time, TTR]
+
+filters:
+  - name: open_cases
+    description: Currently open or pending cases
+    expr: status IN ('open', 'pending')
+
+  - name: escalated_cases
+    description: Cases that have been escalated
+    expr: status = 'escalated'
+
+  - name: high_priority
+    description: High or critical priority cases
+    expr: priority IN ('high', 'critical')
+
+  - name: double_charge_cases
+    description: Cases classified as double-charge issues
+    expr: intent_classified = 'double_charge'
+
+  - name: outage_cases
+    description: Cases related to outages
+    expr: intent_classified = 'outage'
