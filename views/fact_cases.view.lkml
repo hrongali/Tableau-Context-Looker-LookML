@@ -14,7 +14,6 @@
 view: fact_cases {
   sql_table_name: `salesengineering-2022.mccontext_silver.fact_cases` ;;
   label: "Support Cases"
-  description: "Support case lifecycle for McContext customer service. Each row represents a support case (ticket) with priority, SLA tracking, linked entities (charges, orders, outages, refunds), and resolution details."
 
   # ---------------------------------------------------------------------------
   # Dimensions

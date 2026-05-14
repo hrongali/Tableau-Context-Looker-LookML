@@ -7,7 +7,6 @@
 view: customer_360 {
   sql_table_name: `salesengineering-2022.mccontext_gold.customer_360` ;;
   label: "Customer 360"
-  description: "Unified customer profile for McContext. Plus subscription status, lifetime value, CSAT scores, refund history, loyalty tier, and contact information. Gold-layer pre-aggregated customer view."
 
   # ---------------------------------------------------------------------------
   # Dimensions
