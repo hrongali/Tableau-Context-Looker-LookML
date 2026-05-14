@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "bigquery": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "mcp-server-bigquery",
+        "--project",
+        "salesengineering-2022",
+        "--location",
+        "US"
+      ],
+      "env": {}
+    }
+  }
+}
